@@ -13,8 +13,8 @@ if (len(sys.argv) == 3):
 
 from src.algorithms.termination_criteria.device_simulator import DeviceSimulator 
 
-var_lambda_when_connect = 6 #400#40 #93.333 #40
-var_lambda_when_disconnect = 6 #400#26.666 #160 #93.333 #40 #93.333#80
+var_lambda_when_connect = 2 #400#40 #93.333 #40
+var_lambda_when_disconnect = 2 #400#26.666 #160 #93.333 #40 #93.333#80
 total_steps = 3600 # 1 hour is the total time (seconds)
 connected = True
 device = DeviceSimulator(connected, var_lambda_when_connect, var_lambda_when_disconnect, total_steps)
