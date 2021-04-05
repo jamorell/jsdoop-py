@@ -3,7 +3,7 @@ JSDoop-py
 ========================
 
 
-# JSDoop - Distributed Object-Oriented Platform on the Browser
+# JSDoop - Distributed Object-Oriented Platform on the Browser.
 JSDoop Library - Distributed Object-Oriented Platform on the Browser. Python Version.
 
 ## License
