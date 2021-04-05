@@ -7,6 +7,7 @@ from tempfile import SpooledTemporaryFile
 import h5py
 import sys
 
+
 from src.api.load_job import load_job
 from src.api.load_topology import load_model_topology_http
 from src.api.load_old_weights import load_old_weights_http
@@ -94,9 +95,13 @@ def callback(ch, method, properties, body):
       
       m.update_state(Y_test, y_pred)
       acc = m.result().numpy()
+
+      conf_matrix = json.dumps(tf.math.confusion_matrix(labels=tf.argmax(Y_test, 1), predictions=tf.argmax(y_pred, 1)).numpy().tolist())
+      #conf_matrix = tf.math.confusion_matrix(Y_test, y_pred)
       print("#### AGE MODEL " + str(myjson["ageModel"]))
       print("loss = " + str(loss))
       print("acc = " + str(acc))
+      print("conf_matrix = " + conf_matrix)
       ############
       for i in range(len(toAck)):
         print("ACK " + str(toAck[i]))
@@ -104,13 +109,14 @@ def callback(ch, method, properties, body):
 
       toAck.clear()
 
-      message =  '{ "idJob": ' + str(myjson["idJob"]) + ' , "ageModel":' + str(myjson["ageModel"]) + ', "loss":' + str(loss) + ', "acc":' + str(acc) + ', "requestTime":' + str(times[0]) + ', "responseTime":' + str(times[1]) + '}'
-      queue_name = "test_result_" + str(myjson["idJob"])
+      message =  '{ "idJob": ' + str(myjson["idJob"]) + ' , "ageModel":' + str(myjson["ageModel"]) + ', "confusion_matrix":' + conf_matrix + ', "loss":' + str(loss) + ', "acc":' + str(acc) + ', "requestTime":' + str(times[0]) + ', "responseTime":' + str(times[1]) + '}'
+      queue_name = "test_result"  #"test_result_" + str(myjson["idJob"])
       print("sending test results message = " + message)
       print("sending test results queue_name = " + queue_name)
       channel.queue_declare(queue = queue_name)
       channel.basic_publish(exchange = '', routing_key = queue_name, body = message)
-    except:
+    except Exception as e:
+      print("Error testing " + str(e))
       print("next!")
     
 

@@ -4,6 +4,7 @@ import subprocess
 from subprocess import call 
 import sys
 import time
+import random
 
 if (len(sys.argv) == 2):
   sys.argv.append("default_worker_name") 
@@ -18,13 +19,16 @@ var_lambda_when_disconnect = 6 #400#26.666 #160 #93.333 #40 #93.333#80
 total_steps = 3600 # 1 hour is the total time (seconds)
 connected = True
 device = DeviceSimulator(connected, var_lambda_when_connect, var_lambda_when_disconnect, total_steps)
-
+if (random.random() < 0.5):
+  device.is_connected = False
+else:
+  device.is_connected = True  
 #with open('./logfile.txt', 'w') as f:
 #   call(['sh', './worker.sh', '-m', sys.argv[1], sys.argv[2], sys.argv[3]], stdout=f)
 #proc = call(['sh', './worker.sh', sys.argv[1], sys.argv[2], sys.argv[3]])
 proc = None
 
-time_to_load_data = 40
+time_to_load_data = 0#40
 
 #FNULL = open(os.devnull, 'w')
 print("Starting")

@@ -61,11 +61,13 @@ else:
 def callback(ch, method, properties, body):
   # Read the string representing json
   # Into a python list of dicts.
+  print("received text body = " + str(body))
   myjson = json.loads(body)
   print("received " + str(myjson["requestTime"]) + " " + str(myjson["ageModel"]) + " " + str(myjson["loss"]))
   mycursor = mydb.cursor()
-  sql = "INSERT IGNORE INTO test_acc_loss(idJob, ageModel, loss, acc, requestTime, responseTime) VALUES (%s, %s, %s, %s, %s, %s)"
-  values = (myjson["idJob"], myjson["ageModel"], myjson["loss"], myjson["acc"], myjson["requestTime"], myjson["responseTime"])
+  sql = "INSERT IGNORE INTO test_acc_loss(idJob, ageModel, confusion_matrix, loss, acc, requestTime, responseTime) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+  print("confusion_matrix = " + str(myjson["confusion_matrix"]) )
+  values = (myjson["idJob"], myjson["ageModel"], str(myjson["confusion_matrix"]), myjson["loss"], myjson["acc"], myjson["requestTime"], myjson["responseTime"])
   mycursor.execute(sql, values)
   mydb.commit()
   print("ACK " + str(method.delivery_tag))
@@ -73,8 +75,6 @@ def callback(ch, method, properties, body):
 
 
 import pika
-
-#connection = pika.BlockingConnection(pika.ConnectionParameters(host = "mallba9.lcc.uma.es", port = 4012))
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(*US.get_rabbit_params(job_json)))
 channel = connection.channel()

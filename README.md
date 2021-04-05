@@ -1,13 +1,14 @@
-
-JSDoop-py
-========================
-
-
-# JSDoop - Distributed Object-Oriented Platform on the Browser
+# JSDoop-py
 JSDoop Library - Distributed Object-Oriented Platform on the Browser. Python Version.
 
+Developed by José Ángel Morell. 
+For more information please check `this repository <https://github.com/jsdoop/jsdoop>`_.
+
+## Getting started
+Configure **JOB_HOST_REMOTE** and **JOB_PORT_REMOTE** in **/src/constants.py** file and **REMOTEHOST** and **REMOTEPORT** in **/src/jobs.py** file before creating a new job for using remote connections.
+
 ## License
-This module is part of the JSDoop package (www.jsdoop.com).
+This module is part of the JSDoop package (www.jsdoop.com) (https://github.com/jsdoop).
 Copyright (c) 2019 by José Ángel Morell.
 
 JSDoop software is available under the GNU AFFERO GENERAL 

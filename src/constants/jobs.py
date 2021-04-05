@@ -1,25 +1,19 @@
-#		"total_mbatches": 7500, 
-#,  "json_topology": "model_1601478515429_306847"
-# "http://localhost"
-# 8081
-		
-
 from src.constants import constants as C
 
 HTTP = "http://"
-LOCALHOST = "172.26.0.80"
+LOCALHOST = "localhost"
 LOCALPORT = 8081
 PORTRABBIT = 5672
 
-REMOTEHOST = "REMOTE URL WITHOUT HTTP -> myurl.com" #MUST BE MODIFIED
-REMOTEPORT = "REMTOE PORT" #MUST BE MODIFIED
+REMOTEHOST = "" # TODO -> "http://yourremotehost.com"
+REMOTEPORT = 0 # TODO -> your port number
 
 adaptative_aggregation = True
 min_grads_to_accumulate = 2
 limit_outdated_gradients = 5
 
 max_workers = 64
-nworkers = 32
+gradients_to_accumulate = 32 # This parameter is useless when we use adaptive aggregation.
 local_steps = 50
 
 
@@ -76,7 +70,7 @@ DEFAULT_JOB = {
 		}
 	},
 	"aggregator": {
-		"gradients_to_accumulate": nworkers,
+		"gradients_to_accumulate": gradients_to_accumulate,
 		"limit_outdated_gradients": limit_outdated_gradients,
 		"adaptative_aggregation": adaptative_aggregation,
     "min_grads_to_accumulate": min_grads_to_accumulate,
