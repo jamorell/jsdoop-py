@@ -1,16 +1,8 @@
-HTTP = "http://"
-JOB_HOST_LOCAL = HTTP + "localhost"
+JOB_HOST_LOCAL = "http://localhost"
 JOB_PORT_LOCAL = 8081
-JOB_HOST_REMOTE = HTTP + "REMOTE URL WITHOUT HTTP -> myurl.com" #MUST BE MODIFIED
-JOB_PORT_REMOTE = "REMOTE PORT" #MUST BE MODIFIED
+JOB_HOST_REMOTE = "" # TODO -> "http://yourremotehost.com"
+JOB_PORT_REMOTE = 0 # TODO -> your port number
 DEBUG = False
-
-##STATS DATABASE
-SQL_HOST = "localhost"
-SQL_PORT = "61111"
-SQL_USER = "myuser"
-SQL_PASSWORD = "password"
-SQL_DATABASE = "jsdoop"
 
 
 ##DATASETS

@@ -85,7 +85,6 @@ def callback(ch, method, properties, body):
 
 import pika
 
-#connection = pika.BlockingConnection(pika.ConnectionParameters(host = "mallba9.lcc.uma.es", port = 4012))
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(*US.get_rabbit_params(job_json)))
 channel = connection.channel()

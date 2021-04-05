@@ -14,7 +14,7 @@ from src.loaders.topology_loaders import TopologyLoaderHTTP
 from src.loaders.weights_loaders import CurrentWeightsLoaderHTTP
 from src.loaders.gradients_loaders import GradientsLoaderHTTP
 from src.loaders.loss_loaders import LossLoaderJSON
-from src.loaders.dataset_loaders import DatasetLoaderJSON
+from src.loaders.dataset_loaders import DatasetLoaderHTTP #DatasetLoaderJSON
 
 from src.algorithms.termination_criteria.device_simulator import DeviceSimulator 
 import src.algorithms.termination_criteria.termination_criteria as tc #is_end_max_global_age
@@ -35,22 +35,7 @@ class ProblemJSONDistNN:
   def __init__(self, json, is_remote, seed): 
 
     self.json = json
-    '''
-    if (debug):
-      print("MALLBA9 HOST")
-      default_host = "http://mallba9.lcc.uma.es"
-      default_port = 4042
-      self.json["data"]["host"] = default_host
-      self.json["data"]["port"] = default_port
-      self.json["topology"]["host"] = default_host
-      self.json["topology"]["port"] = default_port
-      self.json["weights"]["host"] = default_host
-      self.json["weights"]["port"] = default_port
-      self.json["gradients"]["host"] = default_host
-      self.json["gradients"]["port"] = default_port
-    else:
-      print("LOCAL HOST")
-    '''
+
     # LOAD MODEL TOPOLOGY
     print("self.json = " + str(self.json))
     self.topology_loader = TopologyLoaderHTTP(self.json, is_remote)
@@ -66,7 +51,7 @@ class ProblemJSONDistNN:
     self.loss_calculator = LossLoaderJSON(self.json)
 
     ### INIT LOADING DATA
-    self.dataset = DatasetLoaderJSON(self.json, seed)
+    self.dataset = DatasetLoaderHTTP(self.json, seed, is_remote) #DatasetLoaderJSON(self.json, seed)
 
     ### TERMINATION CRITERIA
     try:
@@ -128,7 +113,7 @@ class TaskSolverDistNN:
 
 
   def local_computation(self, id_task, start_time):
-    xs, ys, mb_selected = self.p.dataset.get_random_batch_from_local_dataset()
+    xs, ys, mb_selected = self.p.dataset.get_random_batch(self, id_task, start_time)
     loss_value, grads = self.p.loss_calculator.grad(self.model, xs, ys)
     print("---> LOSS = " +  str(loss_value))
     #''' INIT LOCAL COMPUTATION '''
@@ -155,7 +140,7 @@ class TaskSolverDistNN:
        
 
   def without_local_computation(self, id_task, start_time):
-    xs, ys, mb_selected = self.p.dataset.get_random_batch_from_local_dataset()
+    xs, ys, mb_selected = self.p.dataset.get_random_batch(self, id_task, start_time)
     loss_value, grads = self.p.loss_calculator.grad(self.model, xs, ys)
     print("---> LOSS = " +  str(loss_value))
     new_current_age = self.p.gradients_loader.save(grads, self, id_task, start_time)
@@ -207,14 +192,14 @@ except:
 
 seed = None
 try:
-  seed = int(sys.argv[2])
+  seed = int(sys.argv[3])
 except:
   exit("ERROR: Please insert a valid seed.")
 
 
 is_remote = False
 try:
-  is_remote = (sys.argv[3].lower() == 'true')
+  is_remote = (sys.argv[4].lower() == 'true')
   print("REMOTE HOST")
 except:
   print("LOCAL HOST")

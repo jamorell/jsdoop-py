@@ -3,14 +3,11 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
-
-/src/constants
-/src/constants/
-
-
 # Node artifact files
 node_modules/
 dist/
+scripts/log_tester.log
+scripts/log_agg.log
 
 # Compiled Java class files
 *.class

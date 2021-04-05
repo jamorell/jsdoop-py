@@ -1,7 +1,16 @@
+import requests
+import numpy as np
 
+def load_data_http(url_data_server, key, id_job, username, id_task):#, info_worker):
+  PARAMS = {'key': key, "id_job": id_job, "username": username, "id_task": id_task, "info_worker": "python" } #, "info_worker": info_worker } 
 
+  headers = {'content-type': 'application/octet-stream'}
+  response = requests.get(url = url_data_server, stream = True,  params = PARAMS) 
+  thebytes = response.raw.read()
+  thearray = np.frombuffer(thebytes)
+  return thearray
 
-
+'''
 def load_data_http(url_data_server, key, id_job, username):
   key = "mnist_8_6339_y.npy"
   print("key = " + key)
@@ -29,3 +38,4 @@ def load_data_http(url_data_server, key, id_job, username):
 #  #returnNumpy = np.load(io.BytesIO(), allow_pickle = True)
 #  print(returnNumpy)
 #  return returnNumpy
+'''
