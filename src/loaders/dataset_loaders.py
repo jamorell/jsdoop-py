@@ -78,7 +78,12 @@ class DatasetLoaderHTTP:
 
 
 
-
+def onehot_to_int(one_hot):
+  if (np.isscalar(one_hot)):
+    return one_hot
+  for i in range(len(one_hot)):
+    if (one_hot[i] == 1):
+      return i
 
 
 
@@ -182,7 +187,8 @@ def iid_to_noniid_data(data, labels, n_clients=100, classes_per_client=10, shuff
   for j, label in enumerate(labels):
     print("j =" + str(j))
     print("label =" + str(label))
-    data_idcs[label] += [j]
+    data_idcs[onehot_to_int(label)] += [j]
+    #data_idcs[label] += [j]
   
   print("data_idcs = " + str(data_idcs))
   '''
