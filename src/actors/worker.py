@@ -14,7 +14,7 @@ from src.loaders.topology_loaders import TopologyLoaderHTTP
 from src.loaders.weights_loaders import CurrentWeightsLoaderHTTP
 from src.loaders.gradients_loaders import GradientsLoaderHTTP
 from src.loaders.loss_loaders import LossLoaderJSON
-from src.loaders.dataset_loaders import DatasetLoaderHTTP #DatasetLoaderJSON
+from src.loaders.dataset_loaders import DatasetLoaderNonIID #DatasetLoaderHTTP #DatasetLoaderJSON
 
 from src.algorithms.termination_criteria.device_simulator import DeviceSimulator 
 import src.algorithms.termination_criteria.termination_criteria as tc #is_end_max_global_age
