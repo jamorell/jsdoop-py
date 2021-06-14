@@ -192,14 +192,14 @@ except:
 
 seed = None
 try:
-  seed = int(sys.argv[3])
+  seed = int(sys.argv[2])
 except:
   exit("ERROR: Please insert a valid seed.")
 
 
 is_remote = False
 try:
-  is_remote = (sys.argv[4].lower() == 'true')
+  is_remote = (sys.argv[3].lower() == 'true')
   print("REMOTE HOST")
 except:
   print("LOCAL HOST")
