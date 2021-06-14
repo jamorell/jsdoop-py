@@ -51,7 +51,7 @@ class ProblemJSONDistNN:
     self.loss_calculator = LossLoaderJSON(self.json)
 
     ### INIT LOADING DATA
-    self.dataset = DatasetLoaderHTTP(self.json, seed, is_remote) #DatasetLoaderJSON(self.json, seed)
+    self.dataset = DatasetLoaderNonIID(self.json, seed, is_remote) #DatasetLoaderHTTP(self.json, seed, is_remote) #DatasetLoaderJSON(self.json, seed)
 
     ### TERMINATION CRITERIA
     try:
