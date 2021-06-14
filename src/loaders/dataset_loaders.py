@@ -258,7 +258,7 @@ class DatasetLoaderNonIID:
     self.local_dataset_len = len(self.X_batches)  
 
 
-  def get_random_batch(self):
+  def get_random_batch(self, worker, id_task, start_time):
     mb_selected = np.random.randint(0, len(self.X_batches)) 
     xs = self.X_batches[mb_selected]
     ys = self.y_batches[mb_selected]
