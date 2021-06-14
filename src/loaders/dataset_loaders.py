@@ -164,9 +164,12 @@ def iid_to_noniid_data(data, labels, n_clients=100, classes_per_client=10, shuff
   np.random.seed(local_seed)
   #####################
   
+  print("labels = " + str(labels))
+  print("labels.shape = " + str(labels.shape))
+
   #### constants #### 
   n_data = data.shape[0]
-  n_labels = int(np.max(labels) + 1)
+  n_labels = np.max(labels) + 1
 
 
   ### client distribution ####
