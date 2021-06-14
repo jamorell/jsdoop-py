@@ -187,6 +187,7 @@ def iid_to_noniid_data(data, labels, n_clients=100, classes_per_client=10, shuff
   for j, label in enumerate(labels):
     print("j =" + str(j))
     print("label =" + str(label))
+    print("one_hot_to_int = " str(onehot_to_int(label)))
     data_idcs[onehot_to_int(label)] += [j]
     #data_idcs[label] += [j]
   
