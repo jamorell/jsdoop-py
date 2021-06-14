@@ -180,6 +180,8 @@ def iid_to_noniid_data(data, labels, n_clients=100, classes_per_client=10, shuff
   # sort for labels
   data_idcs = [[] for i in range(n_labels)]
   for j, label in enumerate(labels):
+    print("j =" + str(j))
+    print("label =" + str(label))
     data_idcs[label] += [j]
   
   print("data_idcs = " + str(data_idcs))
