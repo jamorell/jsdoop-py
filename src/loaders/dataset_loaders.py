@@ -248,9 +248,9 @@ def iid_to_noniid_data(data, labels, n_clients=100, classes_per_client=10, shuff
 
 class DatasetLoaderNonIID:
   def __init__(self, json, seed, is_remote):
-    if seed is not None:
-      random.seed(seed)
-      print("seed = " + str(seed))
+    #if seed is not None:
+    #  random.seed(seed)
+    #  print("seed = " + str(seed))
 
     self.loss_object = tf.keras.losses.deserialize(json["tester"]["losses"])
     self.X_train, self.y_train, self.X_test, self.y_test = loader(json)
