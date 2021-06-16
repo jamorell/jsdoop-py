@@ -192,10 +192,10 @@ def iid_to_noniid_data(data, labels, n_clients=100, classes_per_client=10, shuff
   # sort for labels
   data_idcs = [[] for i in range(n_labels)]
   for j, label in enumerate(labels):
-    print("j =" + str(j))
-    print("label =" + str(label))
-    print("n_labels = " + str(n_labels))
-    print("one_hot_to_int = " + str(onehot_to_int(label)))
+    #print("j =" + str(j))
+    #print("label =" + str(label))
+    #print("n_labels = " + str(n_labels))
+    #print("one_hot_to_int = " + str(onehot_to_int(label)))
     data_idcs[onehot_to_int(label)] += [j]
     #data_idcs[label] += [j]
   
@@ -268,6 +268,8 @@ class DatasetLoaderNonIID:
     ### LOCAL DATASET
     self.total_mbatches = get_total_m_batches(json)
     self.local_dataset_len = len(self.X_batches)  
+    import time
+    time.sleep(3)
     exit()
 
 
