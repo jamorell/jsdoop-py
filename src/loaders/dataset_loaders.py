@@ -83,7 +83,7 @@ def onehot_to_int(one_hot):
     return one_hot
   for i in range(len(one_hot)):
     if (one_hot[i] == 1):
-      return i
+      return np.array(i)
 
 
 
@@ -96,7 +96,7 @@ def print_split(clients_split, n_labels):
   total_data = 0
   print("Data split:")
   for i, client in enumerate(clients_split):
-    split = np.sum(client[1].reshape(1,-1)==np.arange(n_labels).reshape(-1,1), axis=1)
+    split = np.sum(onehot_to_int(client[1]).reshape(1,-1)==np.arange(n_labels).reshape(-1,1), axis=1)
     print(" - Client {}: {} Total = {}".format(i, split, np.sum(split)))
     total_data = total_data + np.sum(split)
 
