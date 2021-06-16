@@ -95,20 +95,21 @@ def onehot_to_int(one_hot):
 def print_split(clients_split, n_labels): 
   total_data = 0
   #print("Data split:")
+  global_temp = []
   for i, client in enumerate(clients_split):
     temp = []
     #print("len(client[1]) = " + str(len(client[1])))
     for k in range(len(client[1])):
       #print("client[1][k] = " + str(client[1][k]))
       temp.append(onehot_to_int(client[1][k]))
-    print("temp = " + str(temp))
     temp = np.array(temp)
     split = np.sum(temp.reshape(1,-1)==np.arange(n_labels).reshape(-1,1), axis=1)
     print(" - Client {}: {} Total = {}".format(i, split, np.sum(split)))
-    total_data = total_data + np.sum(split)
+    global_temp.append(temp)
 
+    total_data = total_data + np.sum(split)
   print("total_data = " + str(total_data))
-  print()
+  print("global_temp = " + str(global_temp))
 
 def clients_rand(train_len, nclients):
   '''
