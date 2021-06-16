@@ -96,8 +96,11 @@ def print_split(clients_split, n_labels):
   total_data = 0
   print("Data split:")
   for i, client in enumerate(clients_split):
-    print("client[1] = " + str(client[1]))
-    split = np.sum(onehot_to_int(client[1]).reshape(1,-1)==np.arange(n_labels).reshape(-1,1), axis=1)
+    temp = []
+    for (k in len(client[1])):
+      temp.append(onehot_to_int(client[1][k]))
+    print("temp = " + str(temp))
+    split = np.sum(temp.reshape(1,-1)==np.arange(n_labels).reshape(-1,1), axis=1)
     print(" - Client {}: {} Total = {}".format(i, split, np.sum(split)))
     total_data = total_data + np.sum(split)
 
