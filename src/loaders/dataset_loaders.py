@@ -251,7 +251,7 @@ class DatasetLoaderNonIID:
     n_labels = 10 # TODO
     n_clients = json["data"]["local_portion_dataset"]
     dataset_split_noniid = iid_to_noniid_data(self.X_train, self.y_train, n_clients=64, classes_per_client=3, shuffle=True, verbose=True)
-    print(dataset_split_noniid[seed][1])
+    print("dataset_split_noniid[" + str(seed) + "][1] = " + str(dataset_split_noniid[seed][1]))
     print(dataset_split_noniid.shape)
     print_split(dataset_split_noniid, n_labels)
     print("seed = " + str(seed))
@@ -261,6 +261,7 @@ class DatasetLoaderNonIID:
     ### LOCAL DATASET
     self.total_mbatches = get_total_m_batches(json)
     self.local_dataset_len = len(self.X_batches)  
+    exit()
 
 
   def get_random_batch(self, worker, id_task, start_time):
