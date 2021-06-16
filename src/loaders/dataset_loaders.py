@@ -94,12 +94,12 @@ def onehot_to_int(one_hot):
 ##### 3. Converting and dividing balanced CIFAR10 into a non-IID dataset. https://towardsdatascience.com/preserving-data-privacy-in-deep-learning-part-3-ae2103c40c22
 def print_split(clients_split, n_labels): 
   total_data = 0
-  print("Data split:")
+  #print("Data split:")
   for i, client in enumerate(clients_split):
     temp = []
-    print("len(client[1]) = " + str(len(client[1])))
+    #print("len(client[1]) = " + str(len(client[1])))
     for k in range(len(client[1])):
-      print("client[1][k] = " + str(client[1][k]))
+      #print("client[1][k] = " + str(client[1][k]))
       temp.append(onehot_to_int(client[1][k]))
     print("temp = " + str(temp))
     temp = np.array(temp)
