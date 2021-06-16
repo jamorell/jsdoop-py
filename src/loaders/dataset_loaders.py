@@ -174,7 +174,7 @@ def iid_to_noniid_data(data, labels, n_clients=100, classes_per_client=10, shuff
 
   #### constants #### 
   n_data = data.shape[0]
-  n_labels = 10 #int(np.max(labels) + 1)
+  n_labels = 10  # TODO #int(np.max(labels) + 1)
   print("n_labels = " + str(n_labels))
 
 
@@ -248,11 +248,16 @@ class DatasetLoaderNonIID:
     self.X_train, self.y_train, self.X_test, self.y_test = loader(json)
 
     #seed in this case is the ID of the worker
+    n_labels = 10 # TODO
     n_clients = json["data"]["local_portion_dataset"]
-    iid_to_noniid_data(self.X_train, self.y_train, n_clients=64, classes_per_client=3, shuffle=True, verbose=True)
-
-    self.X_batches, self.y_batches = create_batches(self.X_train, self.y_train, json)
-
+    dataset_split_noniid = iid_to_noniid_data(self.X_train, self.y_train, n_clients=64, classes_per_client=3, shuffle=True, verbose=True)
+    print(dataset_split_noniid[seed][1])
+    print(dataset_split_noniid.shape)
+    print_split(dataset_split_noniid, n_labels)
+    print("seed = " + str(seed))
+    #self.X_batches, self.y_batches = create_batches(self.X_train, self.y_train, json)
+    self.X_batches, self.y_batches = create_batches(dataset_split_noniid[seed][0], dataset_split_noniid[seed][1], json)
+    print("self.y_batches = " + str(self.y_batches))
     ### LOCAL DATASET
     self.total_mbatches = get_total_m_batches(json)
     self.local_dataset_len = len(self.X_batches)  
