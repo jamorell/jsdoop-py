@@ -83,7 +83,7 @@ def onehot_to_int(one_hot):
     return one_hot
   for i in range(len(one_hot)):
     if (one_hot[i] == 1):
-      return np.array(i)
+      return i
 
 
 
