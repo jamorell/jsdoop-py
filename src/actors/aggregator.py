@@ -99,132 +99,141 @@ def callback(ch, method, properties, body):
 
     logging.debug("method " + str(method))
     logging.debug(" [x] Received %r" % body)
-    myjson = json.loads(body)
 
-    id_task = int(round(time.time() * 1000))
+    try:
+      ### Trying to load JSON
+      myjson = json.loads(body)
 
-    logging.debug("key = " + str(myjson["key"]))
-    age_gradients = myjson["key"][0 : myjson["key"].index("_")] 
-    logging.debug("age_model = " + str(age_model))
-    logging.debug("age_gradients = " + str(age_gradients))
-    if (int(age_gradients) >= (age_model - limit_outdated_gradients)):
-      ###### ADAPTATIVE AGGREGATION INIT
-      if adaptativeAggregation:
-        gradientsToAccumulate = myjson["nWorkers"] # + 1;
-        logging.info("BEFORE*#- nWorkers gradientsToAccumulate = " + str(gradientsToAccumulate)) 
-        if (gradientsToAccumulate > maxGradsToAccumulate):
-          gradientsToAccumulate = maxGradsToAccumulate;
-        elif (gradientsToAccumulate < minGradsToAccumulate):
-          gradientsToAccumulate = minGradsToAccumulate;    
-        logging.info("AFTER*#- nWorkers gradientsToAccumulate = " + str(gradientsToAccumulate))     
-      ###### ADAPTATIVE AGGREGATION END
+      id_task = int(round(time.time() * 1000))
 
-      toAck.append(method.delivery_tag)
-      gradientKeysToRemove.append(myjson["key"])
-      #modelKeysToRemove.append(age_model)
-      logging.debug("Getting " + url_gradients_server + "?key=" + myjson["key"])
-      gradients = load_gradients_http(age_model, url_gradients_server, id_job, myjson["key"], username, id_task)
-      if (gradients is not None):
-        logging.debug("type(gradients) = " + str(type(gradients)))
+      logging.debug("key = " + str(myjson["key"]))
+      age_gradients = myjson["key"][0 : myjson["key"].index("_")] 
+      logging.debug("age_model = " + str(age_model))
+      logging.debug("age_gradients = " + str(age_gradients))
+      ### Checking old gradients
+      if (int(age_gradients) >= (age_model - limit_outdated_gradients)):
+        ###### ADAPTATIVE AGGREGATION INIT
+        if adaptativeAggregation:
+          gradientsToAccumulate = myjson["nWorkers"] # + 1;
+          logging.info("BEFORE*#- nWorkers gradientsToAccumulate = " + str(gradientsToAccumulate)) 
+          if (gradientsToAccumulate > maxGradsToAccumulate):
+            gradientsToAccumulate = maxGradsToAccumulate;
+          elif (gradientsToAccumulate < minGradsToAccumulate):
+            gradientsToAccumulate = minGradsToAccumulate;    
+          logging.info("AFTER*#- nWorkers gradientsToAccumulate = " + str(gradientsToAccumulate))     
+        ###### ADAPTATIVE AGGREGATION END
 
-        for key, val in gradients.items():
-          logging.debug("gradients key = " + key)
+        toAck.append(method.delivery_tag)
+        gradientKeysToRemove.append(myjson["key"])
+        #modelKeysToRemove.append(age_model)
+        ### Loading gradients content --> If error then ACK
+        try:
+          logging.debug("Getting " + url_gradients_server + "?key=" + myjson["key"])
+          gradients = load_gradients_http(age_model, url_gradients_server, id_job, myjson["key"], username, id_task)
+          if (gradients is not None):
+            logging.debug("type(gradients) = " + str(type(gradients)))
 
-
-        if (finalGrads is None):
-          finalGrads = []
-          for k in range(len(gradients["gradients"])):
-            mytensor = tf.convert_to_tensor(gradients["gradients"][k])
-            logging.debug("str(mytensor.shape) " + str(k) + " -> " + str(mytensor.shape))
-
-            #finalGrads.append(tf.convert_to_tensor(gradients["gradients"][k], dtype=tf.float32))
-            finalGrads.append(mytensor)
-            if (C.DEBUG): ##DEBUG
-              logging.debug(")))))))" + str(mytensor))
-              
-        else:
-           for k in range(len(gradients["gradients"])):
-            mytensor = tf.convert_to_tensor(gradients["gradients"][k])
-            logging.debug("str(mytensor.shape) " + str(k) + " -> " + str(mytensor.shape))
-            #finalGrads[k] = tf.math.add(finalGrads[k], tf.convert_to_tensor(gradients["gradients"][k], dtype=tf.float32))
-            finalGrads[k] = tf.math.add(finalGrads[k], mytensor)
-            if (C.DEBUG): ##DEBUG
-              logging.debug("****" + str(finalGrads[k]))
+            for key, val in gradients.items():
+              logging.debug("gradients key = " + key)
 
 
-        logging.debug(type(finalGrads))
-        counter = counter + 1
-        logging.debug("counter " + str(counter))
-        if (counter >= gradientsToAccumulate):
-          logging.debug("\n\n\n###ACCUMULATING*#-  " + str(counter) + " GRADIENTS")
-          logging.info("AGG*#- nWorkers gradientsToAccumulate = " + str(gradientsToAccumulate))  
-          start_time = int(round(time.time() * 1000))
-          #counter = 0
+            if (finalGrads is None):
+              finalGrads = []
+              for k in range(len(gradients["gradients"])):
+                mytensor = tf.convert_to_tensor(gradients["gradients"][k])
+                logging.debug("str(mytensor.shape) " + str(k) + " -> " + str(mytensor.shape))
 
-          # Divide
-          for i in range (len(finalGrads)): 
-            finalGrads[i] = tf.divide(finalGrads[i], counter)          
-            #finalGrads[i] = tf.divide(finalGrads[i], gradientsToAccumulate)
-
-          finalGradsDictionary = {}
-          for i in range(len(gradients["layers"])):
-            finalGradsDictionary[gradients["layers"][i]] = gradients["gradients"][i]
-
-          finalGradsList = []
-
-
-          for i in range(len(mymodel.trainable_variables)):
-            newName = mymodel.trainable_variables[i].name[0:mymodel.trainable_variables[i].name.index(":")]
-            finalGradsList.append(finalGradsDictionary[newName])
-
+                #finalGrads.append(tf.convert_to_tensor(gradients["gradients"][k], dtype=tf.float32))
+                finalGrads.append(mytensor)
+                if (C.DEBUG): ##DEBUG
+                  logging.debug(")))))))" + str(mytensor))
                   
-          optimizer.apply_gradients(zip(finalGradsList, mymodel.trainable_variables), experimental_aggregate_gradients=True) 
+            else:
+               for k in range(len(gradients["gradients"])):
+                mytensor = tf.convert_to_tensor(gradients["gradients"][k])
+                logging.debug("str(mytensor.shape) " + str(k) + " -> " + str(mytensor.shape))
+                #finalGrads[k] = tf.math.add(finalGrads[k], tf.convert_to_tensor(gradients["gradients"][k], dtype=tf.float32))
+                finalGrads[k] = tf.math.add(finalGrads[k], mytensor)
+                if (C.DEBUG): ##DEBUG
+                  logging.debug("****" + str(finalGrads[k]))
 
-          logging.debug("applied gradients")
 
-          # Save Model
-          age_model = age_model + 1
+            logging.debug(type(finalGrads))
+            counter = counter + 1
+            logging.debug("counter " + str(counter))
+            if (counter >= gradientsToAccumulate):
+              logging.debug("\n\n\n###ACCUMULATING*#-  " + str(counter) + " GRADIENTS")
+              logging.info("AGG*#- nWorkers gradientsToAccumulate = " + str(gradientsToAccumulate))  
+              start_time = int(round(time.time() * 1000))
+              #counter = 0
 
-          logging.debug("\n\n\nSAVING MODEL WEIGHTS " + str(age_model))
+              # Divide
+              for i in range (len(finalGrads)): 
+                finalGrads[i] = tf.divide(finalGrads[i], counter)          
+                #finalGrads[i] = tf.divide(finalGrads[i], gradientsToAccumulate)
 
-          names = [weight.name for layer in mymodel.layers for weight in layer.weights]
-          weights = mymodel.trainable_variables
-          names = list(map(lambda x: x[0:x.index(':')], names))
-          execution_time = int(round(time.time() * 1000)) - start_time
-          save_model_weights_http(weights, names, url_current_weights, id_job, age_model, False, gradientKeysToRemove, username, id_task, execution_time, counter) # counter = n_accumulated_gradients
-          logging.debug("age_model = " + str(age_model))
-          finalGrads = None
-          
-          for i in range(len(toAck)):
-            logging.debug("ACK " + str(toAck[i]))
-            channel.basic_ack(toAck[i])
+              finalGradsDictionary = {}
+              for i in range(len(gradients["layers"])):
+                finalGradsDictionary[gradients["layers"][i]] = gradients["gradients"][i]
 
-          toAck.clear()
-          gradientKeysToRemove.clear()
-          counter = 0  
+              finalGradsList = []
+
+
+              for i in range(len(mymodel.trainable_variables)):
+                newName = mymodel.trainable_variables[i].name[0:mymodel.trainable_variables[i].name.index(":")]
+                finalGradsList.append(finalGradsDictionary[newName])
+
+                      
+              optimizer.apply_gradients(zip(finalGradsList, mymodel.trainable_variables), experimental_aggregate_gradients=True) 
+
+              logging.debug("applied gradients")
+
+              # Save Model
+              age_model = age_model + 1
+
+              logging.debug("\n\n\nSAVING MODEL WEIGHTS " + str(age_model))
+
+              names = [weight.name for layer in mymodel.layers for weight in layer.weights]
+              weights = mymodel.trainable_variables
+              names = list(map(lambda x: x[0:x.index(':')], names))
+              execution_time = int(round(time.time() * 1000)) - start_time
+              save_model_weights_http(weights, names, url_current_weights, id_job, age_model, False, gradientKeysToRemove, username, id_task, execution_time, counter) # counter = n_accumulated_gradients
+              logging.debug("age_model = " + str(age_model))
+              finalGrads = None
+              
+              for i in range(len(toAck)):
+                logging.debug("ACK " + str(toAck[i]))
+                channel.basic_ack(toAck[i])
+
+              toAck.clear()
+              gradientKeysToRemove.clear()
+              counter = 0  
+          else:
+            print("age_model = " + str(age_model))
+            print("ACK " + str(method.delivery_tag))
+            #channel.basic_ack(method.delivery_tag)
+            outdatedToAck.append(method.delivery_tag)
+            outdatedGradientKeysToRemove.append(myjson["key"]) # these are not outdated, these are error gradients but I use the same array
+
+        except Exception as e: 
+          logging.debug("Exception getting data from json: " + str(e))      
       else:
-        print("age_model = " + str(age_model))
-        print("ACK " + str(method.delivery_tag))
-        #channel.basic_ack(method.delivery_tag)
+        ### ACK old gradients
+        logging.debug("age_model = " + str(age_model))
+        logging.debug("too old gradients " + str(age_gradients))
         outdatedToAck.append(method.delivery_tag)
-        outdatedGradientKeysToRemove.append(myjson["key"]) # these are not outdated, these are error gradients but I use the same array
+        outdatedGradientKeysToRemove.append(myjson["key"])
+        if (len(outdatedGradientKeysToRemove) >= maxOutdatedGradientsBeforeACK):
+          delete_gradients_http(id_job, outdatedGradientKeysToRemove, url_delete_gradients)
+          for i in range(len(outdatedToAck)):
+            logging.debug("ACK " + str(outdatedToAck[i]))
+            channel.basic_ack(outdatedToAck[i])
+          outdatedToAck.clear()
+          outdatedGradientKeysToRemove.clear() 
 
     
-    else:
-      logging.debug("age_model = " + str(age_model))
-      logging.debug("too old gradients " + str(age_gradients))
-      outdatedToAck.append(method.delivery_tag)
-      outdatedGradientKeysToRemove.append(myjson["key"])
-      if (len(outdatedGradientKeysToRemove) >= maxOutdatedGradientsBeforeACK):
-        delete_gradients_http(id_job, outdatedGradientKeysToRemove, url_delete_gradients)
-        for i in range(len(outdatedToAck)):
-          logging.debug("ACK " + str(outdatedToAck[i]))
-          channel.basic_ack(outdatedToAck[i])
-        outdatedToAck.clear()
-        outdatedGradientKeysToRemove.clear() 
-
-  
- 
+    except Exception as e: 
+      logging.debug("Exception loading json: " + str(e)) 
 
 
 
