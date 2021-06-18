@@ -237,9 +237,15 @@ def callback(ch, method, properties, body):
         except Exception as e: 
           logging.debug("EXCEPTION getting data from json: " + str(e))     
           if (len(toAck)>0):
-            toAck.pop()
+            channel.basic_ack(popped)
           if (len(gradientKeysToRemove)>0):
             gradientKeysToRemove.pop() 
+
+          outdatedToAck.append(method.delivery_tag)
+          outdatedGradientKeysToRemove.append(myjson["key"]) # these are not outdated, these are error gradients but I use the same array
+          if (len(outdatedGradientKeysToRemove) >= maxOutdatedGradientsBeforeACK):
+            perform_ack_and_remove_gradients(channel, outdatedToAck, outdatedGradientKeysToRemove, id_job, url_delete_gradients)
+
       else:
         ### ACK old gradients
         logging.debug("TOO OLD GRADIENTS too old gradients -> age_model = " + str(age_model) + " age_gradients = " + str(age_gradients))
