@@ -237,7 +237,7 @@ def callback(ch, method, properties, body):
         except Exception as e: 
           logging.debug("EXCEPTION getting data from json: " + str(e))     
           if (len(toAck)>0):
-            channel.basic_ack(popped)
+            toAck.pop()
           if (len(gradientKeysToRemove)>0):
             gradientKeysToRemove.pop() 
 
@@ -264,7 +264,8 @@ def callback(ch, method, properties, body):
     
     except Exception as e: 
       logging.debug("EXCEPTION loading json: " + str(e)) 
-
+      channel.basic_ack(method.delivery_tag)
+        
 
 
 
