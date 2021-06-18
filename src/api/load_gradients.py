@@ -18,13 +18,13 @@ logging.basicConfig(
 )
 
 def load_gradients_http(age_model, url_gradients, id_job, id_gradients, username, id_task):
-  print("################ load_gradients INIT")
+  logging.debug("################ load_gradients INIT")
   PARAMS = {'id_job': id_job, 'age_model': age_model, 'id_grads': id_gradients, 'info_worker': "python_aggregator", "username": username, "id_task": id_task } 
-  print("url_gradients = " + url_gradients)
+  logging.debug("url_gradients = " + url_gradients)
   response = requests.get(url = url_gradients, params = PARAMS) 
-  print(response)
-  print(response.status_code)
-  print("len(response.content) = " + str(len(response.content)))
+  logging.debug(response)
+  logging.debug(response.status_code)
+  logging.debug("len(response.content) = " + str(len(response.content)))
   if response.status_code == 200:
 
     print(response.content[0:200])
@@ -34,7 +34,7 @@ def load_gradients_http(age_model, url_gradients, id_job, id_gradients, username
     
     lst = []
     mydict = {}
-    print("TOTAL PARTS  = " + str(len(decoder.MultipartDecoder(responseGet.content, responseGet.headers["Content-Type"]).parts)))
+    logging.debug("TOTAL PARTS  = " + str(len(decoder.MultipartDecoder(responseGet.content, responseGet.headers["Content-Type"]).parts)))
     totalLayersTest = 0
     totalGradientsTest = 0
     try:
@@ -75,7 +75,7 @@ def load_gradients_http(age_model, url_gradients, id_job, id_gradients, username
               #pattern = re.compile("\/.*:[0-9]*")
               #index = pattern.search(layername).span()
               #index = index[0]
-              #print("...................index = " + str(index))
+              #logging.debug("...................index = " + str(index))
               #if (index > 0):
               #  layername = layername[0:index]
               #

@@ -70,7 +70,7 @@ url_delete_gradients = US.get_url_delete_gradients(job_json, is_remote)
 #optimizer = tf.keras.optimizers.SGD(learning_rate = 0.01)
 #optimizer = tf.keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 optimizer = tf.keras.optimizers.deserialize(job_json["optimizer"])
-print(tf.keras.optimizers.serialize(optimizer))
+logging.debug(tf.keras.optimizers.serialize(optimizer))
 
 finalGrads = None
 counter = 0
@@ -86,6 +86,17 @@ outdatedGradientKeysToRemove = []
 outdatedToAck = []
 
 limit_outdated_gradients = job_json["aggregator"]["limit_outdated_gradients"] #5 #2
+
+
+def perform_ack_and_remove_gradients(channel, list_to_ack, gradient_keys_to_remove, id_job, url_delete_gradients):
+  delete_gradients_http(id_job, gradient_keys_to_remove, url_delete_gradients)
+  for i in range(len(list_to_ack)):
+    logging.debug("old ACK " + str(list_to_ack[i]))
+    channel.basic_ack(list_to_ack[i])
+  list_to_ack.clear()
+  gradient_keys_to_remove.clear() 
+
+
 
 def callback(ch, method, properties, body):
     global finalGrads
@@ -124,6 +135,7 @@ def callback(ch, method, properties, body):
         ###### ADAPTATIVE AGGREGATION END
 
         toAck.append(method.delivery_tag)
+        logging.info("len(toAck) = " + str(len(toAck)))
         gradientKeysToRemove.append(myjson["key"])
         #modelKeysToRemove.append(age_model)
         ### Loading gradients content --> If error then ACK
@@ -186,7 +198,7 @@ def callback(ch, method, properties, body):
                       
               optimizer.apply_gradients(zip(finalGradsList, mymodel.trainable_variables), experimental_aggregate_gradients=True) 
 
-              logging.debug("applied gradients")
+              logging.debug("APPLIED GRADIENTS -> age_model = " + str(age_model) + " age_gradients = " + str(age_gradients))
 
               # Save Model
               age_model = age_model + 1
@@ -198,42 +210,54 @@ def callback(ch, method, properties, body):
               names = list(map(lambda x: x[0:x.index(':')], names))
               execution_time = int(round(time.time() * 1000)) - start_time
               save_model_weights_http(weights, names, url_current_weights, id_job, age_model, False, gradientKeysToRemove, username, id_task, execution_time, counter) # counter = n_accumulated_gradients
-              logging.debug("age_model = " + str(age_model))
+              logging.debug("SAVED MODEL age_model = " + str(age_model))
               finalGrads = None
               
               for i in range(len(toAck)):
-                logging.debug("ACK " + str(toAck[i]))
+                logging.debug("normal ACK " + str(toAck[i]))
                 channel.basic_ack(toAck[i])
 
               toAck.clear()
               gradientKeysToRemove.clear()
               counter = 0  
           else:
-            print("age_model = " + str(age_model))
-            print("ACK " + str(method.delivery_tag))
+            logging.debug("GRADIENTS ARE NONE")
+            logging.debug("GRADIENTS ARE NONE age_model = " + str(age_model))
+            logging.debug("GRADIENTS ARE NONE adding to ACK but not doing ACK yet " + str(method.delivery_tag))
             #channel.basic_ack(method.delivery_tag)
+            if (len(toAck)>0):
+              toAck.pop()
+            if (len(gradientKeysToRemove)>0):
+              gradientKeysToRemove.pop()
             outdatedToAck.append(method.delivery_tag)
             outdatedGradientKeysToRemove.append(myjson["key"]) # these are not outdated, these are error gradients but I use the same array
+            if (len(outdatedGradientKeysToRemove) >= maxOutdatedGradientsBeforeACK):
+              perform_ack_and_remove_gradients(channel, outdatedToAck, outdatedGradientKeysToRemove, id_job, url_delete_gradients)
 
         except Exception as e: 
-          logging.debug("Exception getting data from json: " + str(e))      
+          logging.debug("EXCEPTION getting data from json: " + str(e))     
+          if (len(toAck)>0):
+            toAck.pop()
+          if (len(gradientKeysToRemove)>0):
+            gradientKeysToRemove.pop() 
       else:
         ### ACK old gradients
-        logging.debug("age_model = " + str(age_model))
-        logging.debug("too old gradients " + str(age_gradients))
+        logging.debug("TOO OLD GRADIENTS too old gradients -> age_model = " + str(age_model) + " age_gradients = " + str(age_gradients))
         outdatedToAck.append(method.delivery_tag)
         outdatedGradientKeysToRemove.append(myjson["key"])
         if (len(outdatedGradientKeysToRemove) >= maxOutdatedGradientsBeforeACK):
+          perform_ack_and_remove_gradients(channel, outdatedToAck, outdatedGradientKeysToRemove, id_job, url_delete_gradients)
+          '''
           delete_gradients_http(id_job, outdatedGradientKeysToRemove, url_delete_gradients)
           for i in range(len(outdatedToAck)):
             logging.debug("ACK " + str(outdatedToAck[i]))
             channel.basic_ack(outdatedToAck[i])
           outdatedToAck.clear()
           outdatedGradientKeysToRemove.clear() 
-
+          '''
     
     except Exception as e: 
-      logging.debug("Exception loading json: " + str(e)) 
+      logging.debug("EXCEPTION loading json: " + str(e)) 
 
 
 
