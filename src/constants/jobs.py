@@ -5,16 +5,16 @@ LOCALHOST = "localhost"
 LOCALPORT = 8081
 PORTRABBIT = 5672
 
-REMOTEHOST = "" # TODO -> "http://yourremotehost.com"
-REMOTEPORT = 0 # TODO -> your port number
+REMOTEHOST = "localhost" # TODO -> "http://yourremotehost.com"
+REMOTEPORT = 8081 # TODO -> your port number
 
-adaptative_aggregation = True
+adaptative_aggregation = False
 min_grads_to_accumulate = 2
 limit_outdated_gradients = 5
 
 max_workers = 64
-gradients_to_accumulate = 32 # This parameter is useless when we use adaptive aggregation.
-local_steps = 50
+gradients_to_accumulate = 2 #32 # This parameter is useless when we use adaptive aggregation.
+local_steps = 200
 
 
 DEFAULT_JOB = {
