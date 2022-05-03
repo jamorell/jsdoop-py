@@ -5,7 +5,7 @@ LOCALHOST = "localhost"
 LOCALPORT = 8081
 PORTRABBIT = 5672
 
-REMOTEHOST = "localhost" # TODO -> "http://yourremotehost.com"
+REMOTEHOST = "192.168.1.20" # TODO -> "http://yourremotehost.com"
 REMOTEPORT = 8081 # TODO -> your port number
 
 adaptative_aggregation = False
